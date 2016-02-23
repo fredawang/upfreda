@@ -1,0 +1,18 @@
+/* React Starter Kit | MIT License | http://www.reactstarterkit.com/ */
+
+@import '../variables.css';
+
+.LoginPage-container {
+  margin: 0 auto;
+  padding: 100px 0;
+  max-width: var(--max-content-width);
+}
+.form-group{
+    padding-bottom:10px;
+}
+.btn{
+    width:150px;
+}
+.login{
+    margin-right:10px;
+}

@@ -1,0 +1,7 @@
+.ArticleItem-title{
+    color: rgba(0, 0, 0, .6);
+    font-size:20px;
+}
+.ArticleItem-title:hover{
+    color: rgba(0, 0, 0, 1);
+}

@@ -25,9 +25,34 @@ class LayoutColumn extends Component {
         this.index = this.props.index;
         this.width = this.props.style.width;
         this.height = this.props.style.height;
+        let default_config = {
+            unit:"px",
+            container_width:500,
+            container_height:200,
+            border_width:5,
+            left_width_percent:0.5,
+            container:{
+                
+            },
+            left_container:{
+                
+            },
+            right_container:{
+                
+            }
+            
+        }
+        
+        this.config = $.extend({}, default_config, this.props.style);
+        
+        this.state = {
+            width:this.config.width,
+            height:this.config.height,
+            distance:0
+        }
         this.computer_style();
     }
-    
+
     
     onStatusChange(list) {
         console.log("LayoutColumn:onStatusChange");
@@ -41,18 +66,16 @@ class LayoutColumn extends Component {
         console.log("LayoutColumn:handleclick:click!");
         
     }
-    moveLiner(distance){
-        console.log("move liner");
-    }
+    
     handleMouseDown(e){
         $("body").css("cursor","e-resize");
         var self = this;
         let clientX = e.clientX;
         let timer,
-            left_width = parseInt(this.state.left_style.width),
-            right_width = parseInt(this.state.right_style.width),
-            right_pos_left = parseInt(this.state.right_style.left),
-            liner_pos_left = parseInt(this.state.liner_style.left);
+            left_width = parseInt(this.left_style.width),
+            right_width = parseInt(this.right_style.width),
+            right_pos_left = parseInt(this.right_style.left),
+            liner_pos_left = parseInt(this.liner_style.left);
         $(window).bind("mousemove", function(e){
                 timer = setTimeout(function(){
                     let move_dis = e.clientX - clientX;
@@ -61,17 +84,14 @@ class LayoutColumn extends Component {
                     right_width -= move_dis;
                     right_pos_left += move_dis;
                     liner_pos_left += move_dis;
-                    console.log(left_width);
                     if(left_width >= self.left_min_width && right_width >= self.right_min_width){
-                        console.log("setState")
-                        self.setState(function(preState){
-                            let state = preState;
-                            state.left_style.width = left_width;
-                            state.right_style.width = right_width;
-                            state.right_style.left = right_pos_left;
-                            state.liner_style.left = liner_pos_left;
-                            return state;
-                        });
+                        self.left_style.width = left_width + self.unit;
+                        self.right_style.width = right_width + self.unit;
+                        self.right_style.left = right_pos_left + self.unit;
+                        self.liner_style.left = liner_pos_left + self.unit;
+                        console.log("aaa");
+                        console.log(self.left_style);
+                        self.render();
                     }
                     
                 }, 1000/6);
@@ -85,48 +105,40 @@ class LayoutColumn extends Component {
         });
     }
     resize_width(){
-        self = this;
-        let left_width_percent = parseInt(this.state.left_style.width) / parseInt(this.state.right_style.width);
-        let left_width = left_width_percent * (this.width - this.props.liner_width),
-            right_width = this.width - this.props.liner_width - left_width,
-            right_pos_left = left_width + this.props.liner_width,
+        let left_width_percent = parseInt(this.left_style.width) / parseInt(this.right_style.width);
+        console.log(left_width_percent);
+        let left_width = left_width_percent * (this.width - this.liner_width),
+            right_width = this.width - this.liner_width - left_width,
+            right_pos_left = left_width + this.liner_width,
             liner_pos_left = left_width;
-        self.setState(function(preState){
-            let state = preState;
-            state.left_style.width = left_width + self.props.unit;
-            state.right_style.width = right_width + self.props.unit;
-            state.right_style.left = right_pos_left + self.props.unit;
-            state.liner_style.width = liner_pos_left + self.props.unit;
-            state.container_style.width = self.width + self.unit;
-            return state;
-        });
+        this.left_style.width = left_width + this.unit;
+        this.right_style.width = right_width + this.unit;
+        this.right_style.left = right_pos_left + this.unit;
+        this.liner_style.left = liner_pos_left + this.unit;
+        this.container_style.width = this.width + this.unit;
     }
     resize_height(){
-        self = this;
-        self.setState(function(preState){
-            let state = preState;
-            state.left_style.height = (self.height - self.props.border_width * 2) + self.props.unit;
-            state.right_style.height = (self.height - self.props.border_width * 2) + self.props.unit;
-            state.container_style.height = self.height + self.unit;
-            return state;
-        });
+        this.left_style.height = (this.height - this.border_width * 2) + this.unit;
+        this.right_style.height = (this.height - this.border_width * 2) + this.unit;
+        this.container_style.height = this.height + this.unit;
     }
     resize_container(){
-        if(this.props.width != this.width){
-            this.width = this.props.width;
+        let resize_flag = false;
+        if(this.props.style.width != this.width){
+            this.width = this.props.style.width;
             this.resize_width();
+            resize_flag = true;
         }
-        if(this.props.height != this.height){
-            this.height = this.props.height;
+        if(this.props.style.height != this.height){
+            this.height = this.props.style.height;
             this.resize_height();
+            resize_flag = true;
         }
     }
     computer_style(){
         let style = this.props.style?this.props.style:{};
         this.unit = style.unit?style.unit:"px";
-        this.width = style.width?style.width:500;
         this.left_width_percent = style.left_width_percent?style.left_width_percent:0.5;
-        this.height = style.height?style.height:200;
         this.liner_width = style.liner_width?style.liner_width:5;
         this.border_width = style.border_width?style.border_width:0;
         this.liner_color = style.liner_color?style.liner_color:"#000";
@@ -134,21 +146,26 @@ class LayoutColumn extends Component {
         this.left_min_width = style.left_min_width?style.left_min_width:50;
         this.right_min_width = style.right_min_width?style.right_min_width:50;
         
+        
+        
+        this.computer_show_style();
+    }
+    computer_show_style(){
         this.get_container_style();
         this.get_left_container_style();
         this.get_right_container_style();
         this.get_liner_style();
     }
-    
     get_container_style(){
-        this.state.container_style = {
+        this.container_style = {
             height:this.height + this.unit, 
             width:this.width + this.unit,
             border: this.border_width + this.unit + " solid " + this.border_color
-        }
+        };
+        console.log(this.container_style);
     }
     get_left_container_style(){
-        this.state.left_style = {
+        this.left_style = {
             width: (this.width*this.left_width_percent - this.liner_width) + this.unit,
             height:(this.height - this.border_width*2) + this.unit,
             top:0,
@@ -156,15 +173,16 @@ class LayoutColumn extends Component {
         };
     }
     get_right_container_style(){
-        this.state.right_style = {
-            width: (this.width*this.left_width_percent - this.border_width*2) + this.unit ,
+        console.log("right" + (this.width*(1-this.left_width_percent) - this.border_width*2));
+        this.right_style = {
+            width: (this.width*(1-this.left_width_percent) - this.border_width*2) + this.unit ,
             height:(this.height - this.border_width*2) + this.unit,
             top:0,
             left:this.width*this.left_width_percent + this.unit
         };
     }
     get_liner_style(){
-        this.state.liner_style = {
+        this.liner_style = {
             width: this.liner_width + this.unit ,
             height:(this.height - this.border_width*2) + this.unit,
             top:0,
@@ -175,10 +193,10 @@ class LayoutColumn extends Component {
     render() {
         this.resize_container();
         return (
-            <div className="LayoutColumn-container" style={this.state.container_style}>
-                <div className="LayoutColumn-left-container f-left-container" style = {this.state.left_style}>{this.props.children[0]}</div>
-                <div className="LayoutColumn-liner f-liner" style={this.state.liner_style} onMouseDown={this.handleMouseDown.bind(this)}></div>
-                <div className="LayoutColumn-right-container f-right-container" style = {this.state.right_style}>{this.props.children[1]}</div>
+            <div className="LayoutColumn-container" style={this.container_style}>
+                <div className="LayoutColumn-left-container f-left-container" style = {this.left_style}>{this.props.children[0]}</div>
+                <div className="LayoutColumn-liner f-liner" style={this.liner_style} onMouseDown={this.handleMouseDown.bind(this)}></div>
+                <div className="LayoutColumn-right-container f-right-container" style = {this.right_style}>{this.props.children[1]}</div>
             </div>
         );
     }

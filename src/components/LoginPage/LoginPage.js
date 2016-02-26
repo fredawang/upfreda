@@ -60,7 +60,7 @@ class LoginPage extends Component {
                     </div>
                     <ButtonToolbar className="text-center">
                         <Button bsStyle="primary" bsSize="large" className="btn login" onClick={this.handleLoginClick}>登录</Button>
-                        <Button bsSize="large" className="btn cancel" onClick={this.handleCancelClick}>取消</Button>
+                        <Button bsSize="large" className="btn cancel" onClick={this.handleCancelClick}>重置</Button>
                     </ButtonToolbar>
                 </form>
             </div>
